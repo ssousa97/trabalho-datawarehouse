@@ -36,7 +36,7 @@ def main():
 
     print('Download de arquivos concluído.')
 
-#main()
+main()
 
 
 def create_database():
@@ -76,6 +76,3 @@ def read_data():
         len(data_2019.index)
     })
         
-
-
-read_data()
