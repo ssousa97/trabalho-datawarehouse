@@ -15,7 +15,7 @@ def download_data(link, zip_name, save_path):
         zip_ref.extractall(save_path)
 
 
-def main():
+def download_files():
 
     enade_2019_link = 'https://download.inep.gov.br/microdados/Enade_Microdados/microdados_enade_2019.zip'
     enade_2018_link = 'https://download.inep.gov.br/microdados/Enade_Microdados/microdados_enade_2018.zip'
@@ -35,8 +35,6 @@ def main():
     t3.join()
 
     print('Download de arquivos concluído.')
-
-main()
 
 
 def create_database():

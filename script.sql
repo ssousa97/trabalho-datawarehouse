@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS Organizacao(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Grupo(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Modalidade(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Etnia(codigo integer primary key, nome text);
-CREATE TABLE IF NOT EXISTS Dificuldade(codigo integer primary key, nome text);
+CREATE TABLE IF NOT EXISTS Dificuldade(codigo text primary key, nome text);
 CREATE TABLE IF NOT EXISTS Nota(nota real primary key);
 CREATE TABLE IF NOT EXISTS UF(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Idade(idade integer primary key);
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS Estudante(
     sexo text,
     turno integer,
     nota real,
-    dificuldade integer,
+    dificuldade text,
     etnia integer,
     foreign key(ano) references Ano(ano),
     foreign key(organizacao) references Organizacao(codigo),
@@ -78,3 +78,61 @@ VALUES  (5 , 'MEDICINA VETERINÁRIA'),
         (6405 , 'ENGENHARIA FLORESTAL'),
         (6410 , 'TECNOLOGIA EM SEGURANÇA NO TRABALHO');
 
+INSERT INTO Modalidade(codigo, nome)
+VALUES  (0, 'EaD'),
+        (1, 'Presencial')
+
+INSERT INTO UF(codigo, nome)
+VALUES  (11 ,' Rondônia (RO)'),
+        (12 , 'Acre (AC)'),
+        (13 , 'Amazonas (AM)'),
+        (14 , 'Roraima (RR)'),
+        (15 , 'Pará (PA)'),
+        (16 , 'Amapa (AP)'),
+        (17 , 'Tocantins (TO)'),
+        (21 , 'Maranhão (MA)'),
+        (22, 'Piauí (PI)'),
+        (23 , 'Ceará (CE)'),
+        (24 , 'Rio Grande do Norte (RN)'),
+        (25 , 'Paraíba (PB)'),
+        (26 , 'Pernambuco (PE)'),
+        (27 , 'Alagoas (AL)'),
+        (28 , 'Sergipe (SE)'),
+        (29 , 'Bahia (BA)'),
+        (31 , 'Minas gerais (MG)'),
+        (32 , 'Espírito Santo (ES)'),
+        (33 , 'Rio de Janeiro (RJ)'),
+        (35 , 'São Paulo (SP)'),
+        (41 , 'Paraná (PR)'),
+        (42 , 'Santa Catarina (SC)'),
+        (43 , 'Rio Grande do Sul (RS)'),
+        (50 , 'Mato Grosso do Sul (MS)'),
+        (51 , 'Mato Grosso (MT)'),
+        (52 , 'Goiás (GO)'),
+        (53 , 'Distrito federal (DF)');
+
+INSERT INTO Sexo(sexo)
+VALUES  ('M'), ('F');
+
+INSERT INTO Turno(codigo, nome)
+VALUES  (1, 'Matutino'),
+        (2, 'Verspertino'),
+        (3, 'Integral'),
+        (4, 'Noturno');
+
+INSERT INTO Dificuldade(codigo, nome)
+VALUES  ('A', 'Muito fácil'),
+        ('B', 'Fácil'),
+        ('C', 'Médio'),
+        ('D', 'Difícil'),
+        ('E', 'Muito difícil'),
+        ('*', 'Resposta anulada'),
+        ('.', 'Sem resposta');
+
+INSERT INTO Etnia(codigo, nome)
+VALUES  ('A', 'Branca'),
+        ('B', 'Preta'),
+        ('C', 'Amarela'),
+        ('D', 'Parda'),
+        ('E', 'Indígena'),
+        ('F', 'Não declarado');
