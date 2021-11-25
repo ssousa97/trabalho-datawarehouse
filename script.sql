@@ -2,12 +2,12 @@ CREATE TABLE IF NOT EXISTS Ano(ano integer primary key);
 CREATE TABLE IF NOT EXISTS Organizacao(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Grupo(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Modalidade(codigo integer primary key, nome text);
-CREATE TABLE IF NOT EXISTS Etnia(codigo integer primary key, nome text);
+CREATE TABLE IF NOT EXISTS Etnia(codigo text primary key, nome text);
 CREATE TABLE IF NOT EXISTS Dificuldade(codigo text primary key, nome text);
 CREATE TABLE IF NOT EXISTS Nota(nota real primary key);
 CREATE TABLE IF NOT EXISTS UF(codigo integer primary key, nome text);
 CREATE TABLE IF NOT EXISTS Idade(idade integer primary key);
-CREATE TABLE IF NOT EXISTS Sexo(sexo text);
+CREATE TABLE IF NOT EXISTS Sexo(sexo text primary key);
 CREATE TABLE IF NOT EXISTS Turno(codigo integer primary key, nome text);
 
 CREATE TABLE IF NOT EXISTS Estudante(
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Estudante(
     turno integer,
     nota real,
     dificuldade text,
-    etnia integer,
+    etnia text,
     foreign key(ano) references Ano(ano),
     foreign key(organizacao) references Organizacao(codigo),
     foreign key(grupo) references Grupo(codigo),
@@ -35,19 +35,19 @@ CREATE TABLE IF NOT EXISTS Estudante(
     foreign key(etnia) references Etnia(codigo)
 );
 
-INSERT INTO Ano (ano)
+INSERT or IGNORE INTO Ano (ano)
 VALUES  (2017), 
         (2018),
         (2019);
 
-INSERT INTO Organizacao(codigo, nome)
+INSERT or IGNORE INTO Organizacao(codigo, nome)
 VALUES  (10019, 'Centro Federal de Educação Tecnológica'),
         (10020, 'Centro Universitário'),
         (10022, 'Faculdade'),
         (10026, 'Instituto Federal de Educação, Ciência e Tecnologia'),
         (10028, 'Universidade');
 
-INSERT INTO Grupo(codigo, nome)
+INSERT or IGNORE INTO Grupo(codigo, nome)
 VALUES  (5 , 'MEDICINA VETERINÁRIA'),
         (6 , 'ODONTOLOGIA'),
         (12 , 'MEDICINA'),
@@ -78,11 +78,11 @@ VALUES  (5 , 'MEDICINA VETERINÁRIA'),
         (6405 , 'ENGENHARIA FLORESTAL'),
         (6410 , 'TECNOLOGIA EM SEGURANÇA NO TRABALHO');
 
-INSERT INTO Modalidade(codigo, nome)
+INSERT or IGNORE INTO Modalidade(codigo, nome)
 VALUES  (0, 'EaD'),
-        (1, 'Presencial')
+        (1, 'Presencial');
 
-INSERT INTO UF(codigo, nome)
+INSERT or IGNORE INTO UF(codigo, nome)
 VALUES  (11 ,' Rondônia (RO)'),
         (12 , 'Acre (AC)'),
         (13 , 'Amazonas (AM)'),
@@ -91,7 +91,7 @@ VALUES  (11 ,' Rondônia (RO)'),
         (16 , 'Amapa (AP)'),
         (17 , 'Tocantins (TO)'),
         (21 , 'Maranhão (MA)'),
-        (22, 'Piauí (PI)'),
+        (22 , 'Piauí (PI)'),
         (23 , 'Ceará (CE)'),
         (24 , 'Rio Grande do Norte (RN)'),
         (25 , 'Paraíba (PB)'),
@@ -111,16 +111,16 @@ VALUES  (11 ,' Rondônia (RO)'),
         (52 , 'Goiás (GO)'),
         (53 , 'Distrito federal (DF)');
 
-INSERT INTO Sexo(sexo)
+INSERT or IGNORE INTO Sexo(sexo)
 VALUES  ('M'), ('F');
 
-INSERT INTO Turno(codigo, nome)
+INSERT or IGNORE INTO Turno(codigo, nome)
 VALUES  (1, 'Matutino'),
         (2, 'Verspertino'),
         (3, 'Integral'),
         (4, 'Noturno');
 
-INSERT INTO Dificuldade(codigo, nome)
+INSERT or IGNORE INTO Dificuldade(codigo, nome)
 VALUES  ('A', 'Muito fácil'),
         ('B', 'Fácil'),
         ('C', 'Médio'),
@@ -129,10 +129,17 @@ VALUES  ('A', 'Muito fácil'),
         ('*', 'Resposta anulada'),
         ('.', 'Sem resposta');
 
-INSERT INTO Etnia(codigo, nome)
+INSERT or IGNORE INTO Etnia(codigo, nome)
 VALUES  ('A', 'Branca'),
         ('B', 'Preta'),
         ('C', 'Amarela'),
         ('D', 'Parda'),
         ('E', 'Indígena'),
         ('F', 'Não declarado');
+
+
+CREATE TRIGGER IF NOT EXISTS insert_idade_before_estudante
+    BEFORE INSERT ON Estudante
+BEGIN
+    INSERT or IGNORE INTO Idade(idade) VALUES (NEW.idade);
+END

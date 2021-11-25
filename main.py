@@ -45,9 +45,14 @@ def create_database():
     sql_string = sql_file.read()
     cursor.executescript(sql_string)
 
+    for row in cursor.execute('SELECT * FROM sqlite_master where type="trigger"'):
+        print(row)
+
     con.commit()
     con.close()
 
+
+create_database()
 
 '''
 Dimensões da tabela fato :
@@ -68,9 +73,10 @@ def read_data():
     data_2018 = pd.read_csv('./enade_2018/2018/3.DADOS/microdados_enade_2018.txt', skipinitialspace=True, sep=';', low_memory=False)
     data_2019 = pd.read_csv('./enade_2019/3.DADOS/microdados_enade_2019.txt', skipinitialspace=True, sep=';', low_memory=False)
 
-    print({
-        len(data_2017.index),
-        len(data_2018.index),
-        len(data_2019.index)
-    })
+
+
+
+    
+    
+    
         
