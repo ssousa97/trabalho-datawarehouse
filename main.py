@@ -5,7 +5,12 @@ import sqlite3
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import dataframe_image as dfi
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics  import f1_score,accuracy_score
+
 
 
 '''
@@ -160,7 +165,7 @@ def read_insert_data():
 
 
 ''''
-1 - Nota media por curso
+1 - Nota media por modalidade
 2 - Notas por idade
 3 - Nota media por região do brasil
 4 - Dificuldade percebida por etnia
@@ -170,57 +175,121 @@ def test_data():
     con = sqlite3.connect('estudante.db')
     cursor = con.cursor()
 
-    # Nota média por curso
-    nota_media_curso(cursor.execute('SELECT COUNT(*), AVG(Estudante.nota), Grupo.nome FROM Estudante INNER JOIN Grupo ON Estudante.grupo = Grupo.codigo GROUP BY Estudante.grupo'))
+    # Nota média por modalidade
+    show_graph(cursor.execute('SELECT COUNT(*), AVG(Estudante.nota), Modalidade.nome FROM Estudante INNER JOIN Modalidade ON Estudante.modalidade = Modalidade.codigo GROUP BY Estudante.modalidade'))
 
-    # # Nota média por idade
-    # for row in cursor.execute('select avg(nota), idade from Estudante group by idade'):
-    #     print(row)
+    # Nota média por idade
+    show_graph(cursor.execute('SELECT COUNT(*), AVG(nota), idade FROM Estudante GROUP BY idade'))
 
-    # # Nota média por região do brasil
-    # for row in cursor.execute('select avg(nota), uf from Estudante group by uf'):
-    #     print(row)    
+    # Nota média por região do brasil
+    data = [
+        {},
+        {'regiao' : 'Norte', 'notas_medias' : []},
+        {'regiao' : 'Nordeste', 'notas_medias' : []},
+        {'regiao' : 'Sudeste', 'notas_medias' : []},
+        {'regiao' : 'Sul', 'notas_medias' : []},
+        {'regiao' : 'Centro-Oeste', 'notas_medias' : []}
+    ]
+    sql_string = 'SELECT COUNT(*), AVG(Estudante.nota), UF.nome, UF.codigo FROM Estudante INNER JOIN UF ON Estudante.uf = UF.codigo GROUP BY Estudante.uf'
+    for row in cursor.execute(sql_string):
+        index = int(row[3]/10)
+        data[index]['notas_medias'].append(row[1])
+    for regiao in data:
+        if 'notas_medias' in regiao:
+            regiao['notas_medias'] = np.mean(regiao['notas_medias'])
+    print(data)
+    show_graph_2(data[1:6])
+         
 
 
     etnias = ['A', 'B', 'C', 'D', 'E', 'F', '-']
+    data = []
 
-    # Dificuldade percebida por etnia
-    # for etnia in etnias:
-    #     sql_string = f'''select dificuldade, count(dificuldade), etnia from Estudante where etnia='{etnia}' group by dificuldade'''
-    #     for row in cursor.execute(sql_string):
-    #         print(row) 
+    # # Dificuldade percebida por etnia
+    for etnia in etnias:
+        sql_string = f'''SELECT Estudante.dificuldade, COUNT(Estudante.dificuldade) AS dif, Etnia.nome FROM Estudante INNER JOIN Etnia ON Estudante.etnia = Etnia.codigo WHERE Etnia.codigo='{etnia}' GROUP BY Estudante.dificuldade'''
+        data.append([(row[0], row[1], row[2]) for row in cursor.execute(sql_string)])
+    
+    show_multi_graph_etnia(data)
 
+    data = []
     # Etnia por turno
-    # for etnia in etnias:
-    #     sql_string = f'''select turno, count(turno), etnia from Estudante where etnia='{etnia}' group by turno'''
-    #     for row in cursor.execute(sql_string):
-    #         print(row)
+    for etnia in etnias:
+        sql_string = f'''select turno, count(turno), etnia from Estudante where etnia='{etnia}' group by turno'''
+        data.append([(row[0], row[1], row[2]) for row in cursor.execute(sql_string)])
+
+    show_multi_graph_etnia(data)
     
     con.commit()
     con.close()
 
 
-def nota_media_curso(query_result):
+def show_graph(query_result, orientation='vertical'):
     
-    fig, ax = plt.subplots()
 
     data = [(row[2], row[1]) for row in query_result]
-    
+
     data_x = [dx[0] for dx in data]
-    data_y = [dy[1] for dy in data]
-    df = pd.DataFrame(data_x, data_y)
+    data_y = [round(dy[1],2) for dy in data]
 
-    ax.plot(data_y, data_x)
+    if(orientation == 'vertical'):
+        plt.bar(data_x, data_y)
+        
+    else:
+        plt.barh(data_x, data_y)
 
-    plt.savefig('nota_media_curso.png')
-    # dfi.export(df, 'nota_media_curso_tabela.png')
+    plt.show()    
+
+
+def show_graph_2(data):
+    data_x = []
+    data_y = []
+    for regiao in data:
+        data_x.append(regiao['regiao'])
+        data_y.append(round(regiao['notas_medias'],2))
+
+    plt.barh(data_x, data_y)
+
+    plt.show()
+
+def show_multi_graph_etnia(data):
+    etnias = ['Branca', 'Preta', 'Amarela', 'Parda', 'Indígena', 'Não declarado', 'Dado faltante']
+
+    contagens = []
+
+    for row in data:
+        contagens.append([dificuldade[1] for dificuldade in row])
+
     
+    df = pd.DataFrame(np.transpose(contagens), columns=etnias)
+    print(df)
+
+
+def machine_learn():
+    con = sqlite3.connect('estudante.db')
+    cursor = con.cursor()
+
+    df = pd.DataFrame([row for row in cursor.execute('SELECT * FROM Estudante') if row[8] != -1])
+    X = df[[4, 2, 5]]
+    y = df[[8]]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=2)
+
+    LR = LinearRegression()
+    result  = LR.fit(X_train, y_train)
+
+    print(result.score(X_test,y_test))
+
 
 
 
 # Etapas iniciais, só precisam ser executadas uma vez.
 # preprocess_data()
 # create_database()
-test_data()
+
+# indices para usar no aprendizdo : 4, 2, 5 (estado, curso e idade)
+# indices de resultado : 8(nota)
+machine_learn()
+
 
 
