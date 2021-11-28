@@ -4,6 +4,8 @@ import zipfile
 import sqlite3
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import dataframe_image as dfi
 
 
 '''
@@ -105,11 +107,20 @@ Extração de colunas que serão utilizadas. Facilita leituras posteriores dos a
 '''
 def preprocess_data():
 
-    columns = ['NU_ANO','CO_ORGACAD','CO_GRUPO', 'CO_MODALIDADE', 'CO_UF_CURSO', 'NU_IDADE', 'TP_SEXO', 'CO_TURNO_GRADUACAO', 'NT_GER', 'CO_RS_I1', 'QE_I02']
+    columns = [
+        'NU_ANO','CO_ORGACAD','CO_GRUPO', 
+        'CO_MODALIDADE', 'CO_UF_CURSO',
+        'NU_IDADE', 'TP_SEXO',
+        'CO_TURNO_GRADUACAO', 'NT_GER',
+        'CO_RS_I1', 'QE_I02'
+    ]
 
-    data_2017 = pd.read_csv('./enade_2017/3.DADOS/MICRODADOS_ENADE_2017.txt', skipinitialspace=True, sep=';', low_memory=False)
-    data_2018 = pd.read_csv('./enade_2018/2018/3.DADOS/microdados_enade_2018.txt', skipinitialspace=True, sep=';', low_memory=False)
-    data_2019 = pd.read_csv('./enade_2019/3.DADOS/microdados_enade_2019.txt', skipinitialspace=True, sep=';', low_memory=False)
+    data_2017 = pd.read_csv('./enade_2017/3.DADOS/MICRODADOS_ENADE_2017.txt',
+        skipinitialspace=True, sep=';', low_memory=False)
+    data_2018 = pd.read_csv('./enade_2018/2018/3.DADOS/microdados_enade_2018.txt',
+        skipinitialspace=True, sep=';', low_memory=False)
+    data_2019 = pd.read_csv('./enade_2019/3.DADOS/microdados_enade_2019.txt',
+        skipinitialspace=True, sep=';', low_memory=False)
 
     data_2017 = data_2017[columns]
     data_2018 = data_2018[columns]
@@ -147,21 +158,69 @@ def read_insert_data():
     con.close()
 
 
+
+''''
+1 - Nota media por curso
+2 - Notas por idade
+3 - Nota media por região do brasil
+4 - Dificuldade percebida por etnia
+5 - Etnia por turno
+'''
 def test_data():
     con = sqlite3.connect('estudante.db')
     cursor = con.cursor()
-    cursor.execute('SELECT * FROM Estudante LIMIT 100')
 
+    # Nota média por curso
+    nota_media_curso(cursor.execute('SELECT COUNT(*), AVG(Estudante.nota), Grupo.nome FROM Estudante INNER JOIN Grupo ON Estudante.grupo = Grupo.codigo GROUP BY Estudante.grupo'))
+
+    # # Nota média por idade
+    # for row in cursor.execute('select avg(nota), idade from Estudante group by idade'):
+    #     print(row)
+
+    # # Nota média por região do brasil
+    # for row in cursor.execute('select avg(nota), uf from Estudante group by uf'):
+    #     print(row)    
+
+
+    etnias = ['A', 'B', 'C', 'D', 'E', 'F', '-']
+
+    # Dificuldade percebida por etnia
+    # for etnia in etnias:
+    #     sql_string = f'''select dificuldade, count(dificuldade), etnia from Estudante where etnia='{etnia}' group by dificuldade'''
+    #     for row in cursor.execute(sql_string):
+    #         print(row) 
+
+    # Etnia por turno
+    # for etnia in etnias:
+    #     sql_string = f'''select turno, count(turno), etnia from Estudante where etnia='{etnia}' group by turno'''
+    #     for row in cursor.execute(sql_string):
+    #         print(row)
+    
     con.commit()
     con.close()
+
+
+def nota_media_curso(query_result):
+    
+    fig, ax = plt.subplots()
+
+    data = [(row[2], row[1]) for row in query_result]
+    
+    data_x = [dx[0] for dx in data]
+    data_y = [dy[1] for dy in data]
+    df = pd.DataFrame(data_x, data_y)
+
+    ax.plot(data_y, data_x)
+
+    plt.savefig('nota_media_curso.png')
+    # dfi.export(df, 'nota_media_curso_tabela.png')
+    
 
 
 
 # Etapas iniciais, só precisam ser executadas uma vez.
 # preprocess_data()
 # create_database()
-
-read_insert_data()
 test_data()
 
 
