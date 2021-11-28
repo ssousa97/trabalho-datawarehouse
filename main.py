@@ -197,7 +197,6 @@ def test_data():
     for regiao in data:
         if 'notas_medias' in regiao:
             regiao['notas_medias'] = np.mean(regiao['notas_medias'])
-    print(data)
     show_graph_2(data[1:6])
          
 
@@ -210,7 +209,7 @@ def test_data():
         sql_string = f'''SELECT Estudante.dificuldade, COUNT(Estudante.dificuldade) AS dif, Etnia.nome FROM Estudante INNER JOIN Etnia ON Estudante.etnia = Etnia.codigo WHERE Etnia.codigo='{etnia}' GROUP BY Estudante.dificuldade'''
         data.append([(row[0], row[1], row[2]) for row in cursor.execute(sql_string)])
     
-    show_multi_graph_etnia(data)
+    show_multi_graph(data)
 
     data = []
     # Etnia por turno
@@ -218,7 +217,7 @@ def test_data():
         sql_string = f'''select turno, count(turno), etnia from Estudante where etnia='{etnia}' group by turno'''
         data.append([(row[0], row[1], row[2]) for row in cursor.execute(sql_string)])
 
-    show_multi_graph_etnia(data)
+    show_multi_graph(data)
     
     con.commit()
     con.close()
@@ -252,7 +251,7 @@ def show_graph_2(data):
 
     plt.show()
 
-def show_multi_graph_etnia(data):
+def show_multi_graph(data):
     etnias = ['Branca', 'Preta', 'Amarela', 'Parda', 'Indígena', 'Não declarado', 'Dado faltante']
 
     contagens = []
@@ -287,9 +286,13 @@ def machine_learn():
 # preprocess_data()
 # create_database()
 
+# Etapas de carga de dados e gráficos
+# read_insert_data()
+# test_data()
+
 # indices para usar no aprendizdo : 4, 2, 5 (estado, curso e idade)
 # indices de resultado : 8(nota)
-machine_learn()
+# machine_learn()
 
 
 
